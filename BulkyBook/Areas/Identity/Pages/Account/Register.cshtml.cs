@@ -158,7 +158,6 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = user.Id, code = code },
                         protocol: Request.Scheme);
 
-
                     var PathToFile = _hostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString()
                         + "Templates" + Path.DirectorySeparatorChar.ToString() + "EmailTemplates"
                         + Path.DirectorySeparatorChar.ToString() + "Confirm_Account_Registration.html";

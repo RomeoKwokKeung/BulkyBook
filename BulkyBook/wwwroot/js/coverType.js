@@ -4,7 +4,7 @@ $(document).ready(function () {
     loadDataTable();
 });
 
-
+//datatable.net jquery ajax
 function loadDataTable() {
     dataTable = $('#tblData').DataTable({
         "ajax": {
@@ -31,6 +31,7 @@ function loadDataTable() {
     });
 }
 
+//toastr pop up
 function Delete(url) {
     swal({
         title: "Are you sure you want to Delete?",

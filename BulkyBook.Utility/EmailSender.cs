@@ -13,17 +13,21 @@ namespace BulkyBook.Utility
     {
         private readonly EmailOptions emailOptions;
 
+        //get the value from appsettings.json by EmailOptions
         public EmailSender(IOptions<EmailOptions> options)
         {
             emailOptions = options.Value;
         }
+
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             return Execute(emailOptions.SendGridKey, subject, htmlMessage, email);
         }
-        private Task Execute(string sendGridKEy, string subject,string message, string email)
+
+        //can copy the template from SendGrid official website
+        private Task Execute(string sendGridKey, string subject,string message, string email)
         {
-            var client = new SendGridClient(sendGridKEy);
+            var client = new SendGridClient(sendGridKey);
             var from = new EmailAddress("admin@bulky.com", "Bulky Books");
             var to = new EmailAddress(email, "End User");
             var msg = MailHelper.CreateSingleEmail(from, to, subject, "", message);

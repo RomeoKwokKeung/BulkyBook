@@ -44,6 +44,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             return View(categoryVM);
         }
 
+        //we can create new, so int can be null
         public async Task<IActionResult> Upsert(int? id)
         {
             Category category = new Category();
@@ -79,6 +80,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 _unitOfWork.Save();
                 return RedirectToAction(nameof(Index));
             }
+            //if model state is not vaild
             return View(category);
         }
 
@@ -107,7 +109,6 @@ namespace BulkyBook.Areas.Admin.Controllers
 
             TempData["Success"] = "Category successfully deleted";
             return Json(new { success = true, message = "Delete Successful" });
-
         }
 
         #endregion

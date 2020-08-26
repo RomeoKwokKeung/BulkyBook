@@ -22,6 +22,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        //get the table by API
         public IActionResult Index()
         {
             return View();
