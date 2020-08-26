@@ -37,37 +37,54 @@ namespace BulkyBook
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            //SendGrid
             services.AddSingleton<IEmailSender, EmailSender>();
+
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             
+            //SendGrid
             services.Configure<EmailOptions>(Configuration);
+            //Stripe payment
             services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
+
             services.Configure<BrainTreeSettings>(Configuration.GetSection("BrainTree"));
+            //sms function
             services.Configure<TwilioSettings>(Configuration.GetSection("Twilio"));
+
             services.AddSingleton<IBrainTreeGate, BrainTreeGate>();
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<IDbInitializer, DbInitializer>();
+
+            //Install Razor RunTime Compilation
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
             services.AddRazorPages();
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = $"/Identity/Account/Login";
                 options.LogoutPath = $"/Identity/Account/Logout";
                 options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
+
             services.AddAuthentication().AddFacebook(options =>
             {
                 options.AppId = "479144716347128";
                 options.AppSecret = "8888cefba55e9cfa06a2b28f0495e533";
             });
+
             services.AddAuthentication().AddGoogle(options =>
             {
                 options.ClientId = "751413081977-ct8rrlcf8cgt8f42b5evots13mg458lt.apps.googleusercontent.com";
                 options.ClientSecret = "LPRLug47n8OQsYAirUVGofLw";
 
             });
+
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);

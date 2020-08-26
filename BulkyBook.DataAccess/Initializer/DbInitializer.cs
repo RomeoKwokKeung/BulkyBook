@@ -33,9 +33,9 @@ namespace BulkyBook.DataAccess.Initializer
                     _db.Database.Migrate();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                
+                throw ex;
             }
 
             if (_db.Roles.Any(r => r.Name == SD.Role_Admin)) return;
@@ -50,8 +50,8 @@ namespace BulkyBook.DataAccess.Initializer
                 UserName = "admin@gmail.com",
                 Email = "admin@gmail.com",
                 EmailConfirmed = true,
-                Name = "Bhrugen Patel"
-            },"Admin123*").GetAwaiter().GetResult() ;
+                Name = "Romeo Li"
+            }, "Admin123*").GetAwaiter().GetResult();
 
             ApplicationUser user = _db.ApplicationUsers.Where(u => u.Email == "admin@gmail.com").FirstOrDefault();
 
