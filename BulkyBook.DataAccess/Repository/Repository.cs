@@ -9,10 +9,12 @@ using System.Text;
 
 namespace BulkyBook.DataAccess.Repository
 {
+    //generic type
     public class Repository<T> : IRepository<T> where T : class
     {
-
+        //access database
         private readonly ApplicationDbContext _db;
+        //modify dbset directly
         internal DbSet<T> dbSet;
 
         public Repository(ApplicationDbContext db)
@@ -40,6 +42,7 @@ namespace BulkyBook.DataAccess.Repository
                 query = query.Where(filter);
             }
 
+            //eager loading
             if(includeProperties != null)
             {
                 foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))

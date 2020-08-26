@@ -59,7 +59,6 @@ namespace BulkyBook.Areas.Admin.Controllers
                 if (coverType.Id == 0)
                 {
                     _unitOfWork.SP_Call.Execute(SD.Proc_CoverType_Create, parameter);
-                    
                 }
                 else
                 {

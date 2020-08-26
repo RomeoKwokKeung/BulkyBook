@@ -8,8 +8,10 @@ using System.Text;
 
 namespace BulkyBook.DataAccess.Repository
 {
+    //include what reposity we need
     public class CategoryRepository : RepositoryAsync<Category>, ICategoryRepository
     {
+
         private readonly ApplicationDbContext _db;
 
         public CategoryRepository(ApplicationDbContext db) : base(db)
@@ -17,13 +19,14 @@ namespace BulkyBook.DataAccess.Repository
             _db = db;
         }
 
+        //different model has different update method, so we dont add it in repository class
+        //we do it individually
         public void Update(Category category)
         {
             var objFromDb = _db.Categories.FirstOrDefault(s => s.Id == category.Id);
             if (objFromDb != null)
             {
                 objFromDb.Name = category.Name;
-               
             }
         }
     }

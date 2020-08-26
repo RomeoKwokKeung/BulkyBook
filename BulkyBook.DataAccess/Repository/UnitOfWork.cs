@@ -13,6 +13,7 @@ namespace BulkyBook.DataAccess.Repository
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
+            //initialize every repository
             Category = new CategoryRepository(_db);
             CoverType = new CoverTypeRepository(_db);
             Company = new CompanyRepository(_db);
@@ -39,6 +40,7 @@ namespace BulkyBook.DataAccess.Repository
             _db.Dispose();
         }
 
+        //in repository we dont have save method, so we add it in here
         public void Save()
         {
             _db.SaveChanges();

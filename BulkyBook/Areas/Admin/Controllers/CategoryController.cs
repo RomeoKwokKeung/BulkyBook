@@ -71,7 +71,6 @@ namespace BulkyBook.Areas.Admin.Controllers
                 if (category.Id == 0)
                 {
                     await _unitOfWork.Category.AddAsync(category);
-                    
                 }
                 else
                 {

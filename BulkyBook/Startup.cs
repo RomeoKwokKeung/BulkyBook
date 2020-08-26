@@ -51,13 +51,13 @@ namespace BulkyBook
             services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
 
             services.Configure<BrainTreeSettings>(Configuration.GetSection("BrainTree"));
-            //sms function
+            //SMS function
             services.Configure<TwilioSettings>(Configuration.GetSection("Twilio"));
 
             services.AddSingleton<IBrainTreeGate, BrainTreeGate>();
-
+            //in order to use unit of work, so all controller can use it
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+            //first time to run the web, initialize the admin account
             services.AddScoped<IDbInitializer, DbInitializer>();
 
             //Install Razor RunTime Compilation
