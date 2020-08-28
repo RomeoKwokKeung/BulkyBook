@@ -7,6 +7,7 @@ using System.Text;
 
 namespace BulkyBook.Models
 {
+    //since add properties to ASP.net user table, need to inherit from IdentityUser
     public class ApplicationUser : IdentityUser
     {
         [Required]

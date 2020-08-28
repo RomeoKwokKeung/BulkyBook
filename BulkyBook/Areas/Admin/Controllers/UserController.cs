@@ -27,17 +27,20 @@ namespace BulkyBook.Areas.Admin.Controllers
             return View();
         }
 
-
-
         #region API CALLS
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            var userList = _db.ApplicationUsers.Include(u=>u.Company).ToList();
+            //a list of user
+            var userList = _db.ApplicationUsers.Include(u => u.Company).ToList();
+            //mapping user with role
             var userRole = _db.UserRoles.ToList();
+            //a list of role
             var roles = _db.Roles.ToList();
-            foreach(var user in userList)
+
+            //mapping
+            foreach (var user in userList)
             {
                 var roleId = userRole.FirstOrDefault(u => u.UserId == user.Id).RoleId;
                 user.Role = roles.FirstOrDefault(u => u.Id == roleId).Name;
@@ -53,15 +56,15 @@ namespace BulkyBook.Areas.Admin.Controllers
             return Json(new { data = userList });
         }
 
-      [HttpPost]
-      public IActionResult LockUnlock([FromBody] string id)
+        [HttpPost]
+        public IActionResult LockUnlock([FromBody] string id)
         {
             var objFromDb = _db.ApplicationUsers.FirstOrDefault(u => u.Id == id);
             if (objFromDb == null)
             {
                 return Json(new { success = false, message = "Error while Locking/Unlocking" });
             }
-            if(objFromDb.LockoutEnd!=null && objFromDb.LockoutEnd > DateTime.Now)
+            if (objFromDb.LockoutEnd != null && objFromDb.LockoutEnd > DateTime.Now)
             {
                 //user is currently locked, we will unlock them
                 objFromDb.LockoutEnd = DateTime.Now;
@@ -70,8 +73,21 @@ namespace BulkyBook.Areas.Admin.Controllers
             {
                 objFromDb.LockoutEnd = DateTime.Now.AddYears(1000);
             }
-           _db.SaveChanges();
+            _db.SaveChanges();
             return Json(new { success = true, message = "Operation Successful." });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete([FromBody] string id)
+        {
+            var user = _db.ApplicationUsers.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Error while deleting" });
+            }
+            _db.ApplicationUsers.Remove(user);
+            _db.SaveChanges();
+            return Json(new { success = true, message = "Delete Successful" });
         }
 
         #endregion

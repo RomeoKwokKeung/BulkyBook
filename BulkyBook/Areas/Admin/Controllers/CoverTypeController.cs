@@ -28,6 +28,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             return View();
         }
 
+        //stored procedure
         public IActionResult Upsert(int? id)
         {
             CoverType coverType = new CoverType();
@@ -45,9 +46,9 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return NotFound();
             }
             return View(coverType);
-
         }
 
+        //stored procedure
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Upsert(CoverType coverType)
@@ -74,18 +75,19 @@ namespace BulkyBook.Areas.Admin.Controllers
 
 
         #region API CALLS
-
+        //stored procedure
         [HttpGet]
         public IActionResult GetAll()
         {
             var allObj = _unitOfWork.SP_Call.List<CoverType>(SD.Proc_CoverType_GetAll,null);
             return Json(new { data = allObj });
         }
-
+        //stored procedure
         [HttpDelete]
         public IActionResult Delete(int id)
         {
             var parameter = new DynamicParameters();
+            //20191231213959_AddStoredProcForCoverType 
             parameter.Add("@Id", id);
             var objFromDb = _unitOfWork.SP_Call.OneRecord<CoverType>(SD.Proc_CoverType_Get,parameter);
             if (objFromDb == null)

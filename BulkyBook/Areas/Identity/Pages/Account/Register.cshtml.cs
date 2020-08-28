@@ -76,6 +76,7 @@ namespace BulkyBook.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
 
+            //from ApplicationUser Model
             [Required]
             public string Name { get; set; }
             public string StreetAddress { get; set; }
@@ -88,13 +89,13 @@ namespace BulkyBook.Areas.Identity.Pages.Account
 
             public IEnumerable<SelectListItem> CompanyList { get; set; }
             public IEnumerable<SelectListItem> RoleList { get; set; }
-
         }
 
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
 
+            //add drop down items
             Input = new InputModel()
             {
                 CompanyList = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
@@ -118,6 +119,7 @@ namespace BulkyBook.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+                //added all propertyies from Input model
                 var user = new ApplicationUser
                 {
                     UserName = Input.Email,
@@ -131,12 +133,14 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                     PhoneNumber = Input.PhoneNumber,
                     Role = Input.Role
                 };
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                   
+                   //if we didnt select anything, individual user will be created by default
                     if (user.Role == null)
                     {
                         await _userManager.AddToRoleAsync(user, SD.Role_User_Indi);
@@ -147,6 +151,7 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                         {
                             await _userManager.AddToRoleAsync(user, SD.Role_User_Comp);
                         }
+                        //selected role
                         await _userManager.AddToRoleAsync(user, user.Role);
                     }
 

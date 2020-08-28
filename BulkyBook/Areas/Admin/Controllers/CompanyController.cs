@@ -86,7 +86,6 @@ namespace BulkyBook.Areas.Admin.Controllers
             _unitOfWork.Company.Remove(objFromDb);
             _unitOfWork.Save();
             return Json(new { success = true, message = "Delete Successful" });
-
         }
 
         #endregion

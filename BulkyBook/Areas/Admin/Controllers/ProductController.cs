@@ -18,6 +18,7 @@ namespace BulkyBook.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        //for uploading images inside wwwroot
         private readonly IWebHostEnvironment _hostEnvironment;
 
         public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment hostEnvironment)
@@ -33,11 +34,12 @@ namespace BulkyBook.Areas.Admin.Controllers
 
         public async Task<IActionResult> Upsert(int? id)
         {
-            IEnumerable<Category> CatList = await _unitOfWork.Category.GetAllAsync();
+            IEnumerable<Category> CartList = await _unitOfWork.Category.GetAllAsync();
+            //need drop down so need ViewModel
             ProductVM productVM = new ProductVM()
             {
                 Product=new Product(),
-                CategoryList = CatList.Select(i=> new SelectListItem { 
+                CategoryList = CartList.Select(i=> new SelectListItem { 
                     Text = i.Name,
                     Value = i.Id.ToString()
                 }),
@@ -47,6 +49,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                     Value = i.Id.ToString()
                 })
             };
+
             if (id == null)
             {
                 //this is for create
@@ -68,12 +71,16 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                //get to wwwroot
                 string webRootPath = _hostEnvironment.WebRootPath;
+                //retrieve all files that were uploaded
                 var files = HttpContext.Request.Form.Files;
                 if (files.Count > 0)
                 {
                     string fileName = Guid.NewGuid().ToString();
+                    //navigate to the path of images and product
                     var uploads = Path.Combine(webRootPath, @"images\products");
+                    //now we are inside the product folder, get the file extension
                     var extenstion = Path.GetExtension(files[0].FileName);
 
                     if (productVM.Product.ImageUrl != null)
@@ -85,10 +92,12 @@ namespace BulkyBook.Areas.Admin.Controllers
                             System.IO.File.Delete(imagePath);
                         }
                     }
+                    //upload new file
                     using(var filesStreams = new FileStream(Path.Combine(uploads,fileName+extenstion),FileMode.Create))
                     {
                         files[0].CopyTo(filesStreams);
                     }
+                    //update productVM.Product.ImageUrl
                     productVM.Product.ImageUrl = @"\images\products\" + fileName + extenstion;
                 }
                 else
@@ -117,16 +126,20 @@ namespace BulkyBook.Areas.Admin.Controllers
             else
             {
                 IEnumerable<Category> CatList = await _unitOfWork.Category.GetAllAsync();
+
+                //in order not to get error when we submit by empty input
                 productVM.CategoryList = CatList.Select(i => new SelectListItem
                 {
                     Text = i.Name,
                     Value = i.Id.ToString()
                 });
+
                 productVM.CoverTypeList = _unitOfWork.CoverType.GetAll().Select(i => new SelectListItem
                 {
                     Text = i.Name,
                     Value = i.Id.ToString()
                 });
+
                 if (productVM.Product.Id != 0)
                 {
                     productVM.Product = _unitOfWork.Product.Get(productVM.Product.Id);
@@ -141,6 +154,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
+            //display in the UI category and cover type
             var allObj = _unitOfWork.Product.GetAll(includeProperties:"Category,CoverType");
             return Json(new { data = allObj });
         }
@@ -149,20 +163,24 @@ namespace BulkyBook.Areas.Admin.Controllers
         public IActionResult Delete(int id)
         {
             var objFromDb = _unitOfWork.Product.Get(id);
+
             if (objFromDb == null)
             {
                 return Json(new { success = false, message = "Error while deleting" });
             }
+            //remove old images
             string webRootPath = _hostEnvironment.WebRootPath;
+
             var imagePath = Path.Combine(webRootPath, objFromDb.ImageUrl.TrimStart('\\'));
+
             if (System.IO.File.Exists(imagePath))
             {
                 System.IO.File.Delete(imagePath);
             }
+
             _unitOfWork.Product.Remove(objFromDb);
             _unitOfWork.Save();
             return Json(new { success = true, message = "Delete Successful" });
-
         }
 
         #endregion

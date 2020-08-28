@@ -5,7 +5,7 @@
     var title = "Create Product";
 }
 
-
+<!--enctype: upload image-->
 <form method="post" enctype="multipart/form-data">
     <div class="row p-3 border">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -90,6 +90,7 @@
                     <span asp-validation-for="Product.Price100" class="text-danger"></span>
                 </div>
             </div>
+
             <div class="form-group row">
                 <div class="col-4">
                     Category
@@ -100,6 +101,7 @@
                     <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
                 </div>
             </div>
+
             <div class="form-group row">
                 <div class="col-4">
                     Cover Type
@@ -110,6 +112,7 @@
                     <span asp-validation-for="Product.CoverTypeId" class="text-danger"></span>
                 </div>
             </div>
+
             <div class="form-group row">
                 <div class="col-4">
                    Image
@@ -118,6 +121,7 @@
                     <input type="file" name="files" id="uploadBox" multiple class="form-control" />
                 </div>
             </div>
+
             <div class="form-group row">
                 <div class="col-8 offset-4">
                     @if (Model.Product.Id != 0)
@@ -147,27 +151,27 @@
     </div>
 </form>
 
+<!--tiny: beautiful Text Area-->
 @section Scripts{ 
 <partial name="_ValidationScriptsPartial" />
 <script src="https://cdn.tiny.cloud/1/n94ifuzvl80pchikopiwgz2esrw8n28dwcywvpejlqrregfp/tinymce/5/tinymce.min.js"></script>
 
+<!--include tiny-->
 <script>
-
     tinymce.init({
         selector: 'textarea',
         plugins: 'lists',
         menubar: 'file edit format'
     });
 
-
     function validateInput() {
         if (document.getElementById("uploadBox").value == "") {
+            //sweet alert
             swal("Error", "Please select an image", "error");
             return false;
         }
+        swal("Success", "Congrats! You have already added a new product")
         return true;
     };
-
 </script>
-
 }

@@ -5,6 +5,7 @@ using System.Text;
 
 namespace BulkyBook.Models.ViewModels
 {
+    //need drop down so need ViewModel
     public class ProductVM
     {
         public Product Product { get; set; }
