@@ -54,6 +54,7 @@ namespace BulkyBook.Areas.Identity.Pages.Account
             [EmailAddress]
             public string Email { get; set; }
 
+            //when login by facebook / google
             [Required]
             public string Name { get; set; }
             public string StreetAddress { get; set; }
@@ -143,9 +144,11 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                     Name = Input.Name,
                     PhoneNumber = Input.PhoneNumber,
                 };
+
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
+                    //default individual account
                     await _userManager.AddToRoleAsync(user, SD.Role_User_Indi);
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)

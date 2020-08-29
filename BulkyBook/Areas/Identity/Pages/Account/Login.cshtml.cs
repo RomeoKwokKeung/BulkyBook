@@ -91,9 +91,11 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
+                    //find out the user object first
                     var user = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Email == Input.Email);
 
                     int count = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == user.Id).Count();
+                    //need to set session in home controller (index, details)
                     HttpContext.Session.SetInt32(SD.ssShoppingCart, count);
 
                     _logger.LogInformation("User logged in.");

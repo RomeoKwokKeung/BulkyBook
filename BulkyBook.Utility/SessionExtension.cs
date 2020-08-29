@@ -6,6 +6,7 @@ using System.Text;
 
 namespace BulkyBook.Utility
 {
+    //session for string and int, but we can just use SetInt32 method
     public static class SessionExtension
     {
         public static void SetObject(this ISession session, string key, object value)

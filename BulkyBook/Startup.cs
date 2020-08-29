@@ -49,17 +49,16 @@ namespace BulkyBook
             services.Configure<EmailOptions>(Configuration);
             //Stripe payment
             services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
-
+            //BrainTree payment - not my part
             services.Configure<BrainTreeSettings>(Configuration.GetSection("BrainTree"));
             //SMS function
             services.Configure<TwilioSettings>(Configuration.GetSection("Twilio"));
-
+            //BrainTree payment- not my part
             services.AddSingleton<IBrainTreeGate, BrainTreeGate>();
             //in order to use unit of work, so all controller can use it
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             //first time to run the web, initialize the admin account
             services.AddScoped<IDbInitializer, DbInitializer>();
-
             //Install Razor RunTime Compilation
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
@@ -74,17 +73,16 @@ namespace BulkyBook
 
             services.AddAuthentication().AddFacebook(options =>
             {
-                options.AppId = "479144716347128";
-                options.AppSecret = "8888cefba55e9cfa06a2b28f0495e533";
+                options.AppId = "771655520254614";
+                options.AppSecret = "73c79c339d03171676b20f69c7141893";
             });
 
             services.AddAuthentication().AddGoogle(options =>
             {
-                options.ClientId = "751413081977-ct8rrlcf8cgt8f42b5evots13mg458lt.apps.googleusercontent.com";
-                options.ClientSecret = "LPRLug47n8OQsYAirUVGofLw";
-
+                options.ClientId = "839613119911-l4hfb9hn52845569pu19oj9vrtg374fv.apps.googleusercontent.com";
+                options.ClientSecret = "AWnYZxWDlqRmAVBw6p6BfaG-";
             });
-
+            //session - before add this, we created a SessionExtension class
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -104,7 +102,6 @@ namespace BulkyBook
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
@@ -112,9 +109,11 @@ namespace BulkyBook
 
             app.UseRouting();
             StripeConfiguration.ApiKey = Configuration.GetSection("Stripe")["SecretKey"];
+            //add session
             app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
+            //default Admin account
             dbInitializer.Initialize();
             app.UseEndpoints(endpoints =>
             {

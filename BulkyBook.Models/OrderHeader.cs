@@ -6,6 +6,7 @@ using System.Text;
 
 namespace BulkyBook.Models
 {
+    //contain genetic information about order
     public class OrderHeader
     {
         [Key]

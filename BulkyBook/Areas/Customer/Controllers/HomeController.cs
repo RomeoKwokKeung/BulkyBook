@@ -31,7 +31,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         {
             IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
 
-            //get current user
+            //get current user - for shopping cart session
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
             if (claim != null)
@@ -39,10 +39,9 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var count = _unitOfWork.ShoppingCart
                     .GetAll(c => c.ApplicationUserId == claim.Value)
                     .ToList().Count();
-
+                //also need to get the session to login 
                 HttpContext.Session.SetInt32(SD.ssShoppingCart, count);
             }
-
 
             return View(productList);
         }
@@ -51,6 +50,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         {
             var productFromDb = _unitOfWork.Product.
                         GetFirstOrDefault(u => u.Id == id, includeProperties: "Category,CoverType");
+
             ShoppingCart cartObj = new ShoppingCart()
             {
                 Product = productFromDb,
@@ -68,6 +68,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             if (ModelState.IsValid)
             {
                 //then we will add to cart
+                //find current user
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
                 CartObject.ApplicationUserId = claim.Value;
@@ -88,7 +89,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     //_unitOfWork.ShoppingCart.Update(cartFromDb);
                 }
                 _unitOfWork.Save();
-
+                //get all entities based on the user id
                 var count = _unitOfWork.ShoppingCart
                     .GetAll(c => c.ApplicationUserId == CartObject.ApplicationUserId)
                     .ToList().Count();
@@ -96,10 +97,15 @@ namespace BulkyBook.Areas.Customer.Controllers
                 //HttpContext.Session.SetObject(SD.ssShoppingCart, CartObject);
                 HttpContext.Session.SetInt32(SD.ssShoppingCart, count);
 
+                //example for getting session
+                //var obj = HttpContext.Session.GetObject<ShoppingCart>(SD.ssShoppingCart);
+
                 return RedirectToAction(nameof(Index));
             }
             else
             {
+                //return to the view
+                //make sure everthing for the cart object to diplay inside the details must be populated
                 var productFromDb = _unitOfWork.Product.
                         GetFirstOrDefault(u => u.Id == CartObject.ProductId, includeProperties: "Category,CoverType");
                 ShoppingCart cartObj = new ShoppingCart()

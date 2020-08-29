@@ -6,6 +6,7 @@ using System.Text;
 
 namespace BulkyBook.Models
 {
+    //home item's details
     public class ShoppingCart
     {
         public ShoppingCart()

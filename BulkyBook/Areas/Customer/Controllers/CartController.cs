@@ -50,7 +50,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             ShoppingCartVM = new ShoppingCartVM()
             {
-                OrderHeader = new Models.OrderHeader(),
+                OrderHeader = new OrderHeader(),
                 ListCart = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value, includeProperties: "Product")
             };
             ShoppingCartVM.OrderHeader.OrderTotal = 0;
