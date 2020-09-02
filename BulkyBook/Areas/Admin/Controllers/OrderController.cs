@@ -46,14 +46,15 @@ namespace BulkyBook.Areas.Admin.Controllers
         [ActionName("Details")]
         public IActionResult Details(string stripeToken)
         {
+            //retrieve OrderHeader based on the user id
             OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == OrderVM.OrderHeader.Id,
                                                 includeProperties: "ApplicationUser");
-            if(stripeToken!=null)
+            if (stripeToken != null)
             {
                 //process the payment
                 var options = new ChargeCreateOptions
                 {
-                    Amount = Convert.ToInt32(orderHeader.OrderTotal*100),
+                    Amount = Convert.ToInt32(orderHeader.OrderTotal * 100),
                     Currency = "usd",
                     Description = "Order ID : " + orderHeader.Id,
                     Source = stripeToken
@@ -73,18 +74,18 @@ namespace BulkyBook.Areas.Admin.Controllers
                 if (charge.Status.ToLower() == "succeeded")
                 {
                     orderHeader.PaymentStatus = SD.PaymentStatusApproved;
-                   
+
                     orderHeader.PaymentDate = DateTime.Now;
                 }
 
                 _unitOfWork.Save();
-                
+
             }
             return RedirectToAction("Details", "Order", new { id = orderHeader.Id });
         }
 
 
-        [Authorize(Roles =SD.Role_Admin+","+SD.Role_Employee)]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public IActionResult StartProcessing(int id)
         {
             OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id);
@@ -102,7 +103,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             orderHeader.Carrier = OrderVM.OrderHeader.Carrier;
             orderHeader.OrderStatus = SD.StatusShipped;
             orderHeader.ShippingDate = DateTime.Now;
-            
+
             _unitOfWork.Save();
             return RedirectToAction("Index");
         }
@@ -111,6 +112,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         public IActionResult CancelOrder(int id)
         {
             OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id);
+            //refund method by stripe
             if (orderHeader.PaymentStatus == SD.StatusApproved)
             {
                 var options = new RefundCreateOptions
@@ -133,7 +135,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             }
 
             _unitOfWork.Save();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult UpdateOrderDetails()
@@ -164,8 +166,9 @@ namespace BulkyBook.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetOrderList(string status)
         {
+            //find current user
             var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var claim =claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
             IEnumerable<OrderHeader> orderHeaderList;
 
@@ -175,20 +178,22 @@ namespace BulkyBook.Areas.Admin.Controllers
             }
             else
             {
+                //non-admin user only can get what they ordered
                 orderHeaderList = _unitOfWork.OrderHeader.GetAll(
-                                        u=>u.ApplicationUserId==claim.Value,
+                                        u => u.ApplicationUserId == claim.Value,
                                         includeProperties: "ApplicationUser");
             }
 
+            //fliter
             switch (status)
             {
                 case "pending":
                     orderHeaderList = orderHeaderList.Where(o => o.PaymentStatus == SD.PaymentStatusDelayedPayment);
                     break;
                 case "inprocess":
-                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus==SD.StatusApproved ||
-                                                            o.OrderStatus==SD.StatusInProcess||
-                                                            o.OrderStatus==SD.StatusPending);
+                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusApproved ||
+                                                            o.OrderStatus == SD.StatusInProcess ||
+                                                            o.OrderStatus == SD.StatusPending);
                     break;
                 case "completed":
                     orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusShipped);

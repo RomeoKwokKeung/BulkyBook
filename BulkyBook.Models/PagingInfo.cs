@@ -4,6 +4,7 @@ using System.Text;
 
 namespace BulkyBook.Models
 {
+    //custom tag helper
     public class PagingInfo
     {
         public int TotalItem { get; set; }

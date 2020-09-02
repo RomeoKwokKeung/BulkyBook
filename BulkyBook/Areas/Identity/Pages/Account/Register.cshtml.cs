@@ -217,6 +217,8 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+            //in order not to show the error page when user didnt choose the selectlistItem
+            //need tot load the inputmodel again
             Input = new InputModel()
             {
                 CompanyList = _unitOfWork.Company.GetAll().Select(i => new SelectListItem

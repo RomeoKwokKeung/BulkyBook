@@ -4,6 +4,7 @@ using System.Text;
 
 namespace BulkyBook.Utility
 {
+    //send sms
     public class TwilioSettings
     {
         public string PhoneNumber { get; set; }

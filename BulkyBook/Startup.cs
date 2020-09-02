@@ -42,12 +42,11 @@ namespace BulkyBook
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             //SendGrid
             services.AddSingleton<IEmailSender, EmailSender>();
-
+            //temp data alerts
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
-            
             //SendGrid
             services.Configure<EmailOptions>(Configuration);
-            //Stripe payment
+            //Stripe payment (set the StripeSettings.cs first)
             services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
             //BrainTree payment - not my part
             services.Configure<BrainTreeSettings>(Configuration.GetSection("BrainTree"));
@@ -108,6 +107,7 @@ namespace BulkyBook
             app.UseStaticFiles();
 
             app.UseRouting();
+            //Stripe SecretKey is from StripeSettings.cs from appsettings.json
             StripeConfiguration.ApiKey = Configuration.GetSection("Stripe")["SecretKey"];
             //add session
             app.UseSession();

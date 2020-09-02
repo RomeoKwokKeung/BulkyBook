@@ -27,8 +27,9 @@ namespace BulkyBook.Areas.Customer.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailSender _emailSender;
-
+        //SMS function
         private TwilioSettings _twilioOptions { get; set; }
+        //if the company authorized is not confirmed, will not preceed here 
         private readonly UserManager<IdentityUser> _userManager;
 
         [BindProperty]
@@ -45,15 +46,19 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
+            //find current user
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
+            //initialize new ShoppingCartVM
             ShoppingCartVM = new ShoppingCartVM()
             {
                 OrderHeader = new OrderHeader(),
                 ListCart = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value, includeProperties: "Product")
             };
+            //initialize ordertotal as 0
             ShoppingCartVM.OrderHeader.OrderTotal = 0;
+            //populated application user which is inside shopping cart view model
             ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
                                                         .GetFirstOrDefault(u => u.Id == claim.Value,
                                                         includeProperties: "Company");
@@ -70,7 +75,6 @@ namespace BulkyBook.Areas.Customer.Controllers
                 }
             }
 
-
             return View(ShoppingCartVM);
         }
 
@@ -78,8 +82,10 @@ namespace BulkyBook.Areas.Customer.Controllers
         [ActionName("Index")]
         public async Task<IActionResult> IndexPOST()
         {
+            //find current user
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            //retrieve user object from database
             var user = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Id == claim.Value);
 
             if (user == null)
@@ -87,6 +93,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                 ModelState.AddModelError(string.Empty, "Verification email is empty!");
             }
 
+            //confirm email for authorized company user
+            //copy from Register.cshtml.cs - line 158
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = Url.Page(
@@ -154,26 +162,29 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         public IActionResult Summary()
         {
+            //find current user
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
             ShoppingCartVM = new ShoppingCartVM()
             {
-                OrderHeader = new Models.OrderHeader(),
+                OrderHeader = new OrderHeader(),
                 ListCart = _unitOfWork.ShoppingCart.GetAll(c => c.ApplicationUserId == claim.Value,
                                                             includeProperties: "Product")
             };
-
+            //get aplication user
             ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
                                                             .GetFirstOrDefault(c => c.Id == claim.Value,
                                                                 includeProperties: "Company");
 
+            //calculate the price - copy it from index code
             foreach (var list in ShoppingCartVM.ListCart)
             {
                 list.Price = SD.GetPriceBasedOnQuantity(list.Count, list.Product.Price,
                                                     list.Product.Price50, list.Product.Price100);
                 ShoppingCartVM.OrderHeader.OrderTotal += (list.Price * list.Count);
             }
+            //polulate the OrderHeader property from an AplicationUser
             ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
             ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
             ShoppingCartVM.OrderHeader.StreetAddress = ShoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
@@ -189,8 +200,10 @@ namespace BulkyBook.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult SummaryPost(string stripeToken)
         {
+            //find current user
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            //load shopping cart view model
             ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
                                                             .GetFirstOrDefault(c => c.Id == claim.Value,
                                                                     includeProperties: "Company");
@@ -198,7 +211,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             ShoppingCartVM.ListCart = _unitOfWork.ShoppingCart
                                         .GetAll(c => c.ApplicationUserId == claim.Value,
                                         includeProperties: "Product");
-
+            //retrieve all properties and will display it on the screen
             ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
             ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
             ShoppingCartVM.OrderHeader.ApplicationUserId = claim.Value;
@@ -207,10 +220,12 @@ namespace BulkyBook.Areas.Customer.Controllers
             _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
             _unitOfWork.Save();
 
+            //all of those itmes will add them to the database for order details list
             foreach (var item in ShoppingCartVM.ListCart)
             {
                 item.Price = SD.GetPriceBasedOnQuantity(item.Count, item.Product.Price,
                     item.Product.Price50, item.Product.Price100);
+
                 OrderDetails orderDetails = new OrderDetails()
                 {
                     ProductId = item.ProductId,
@@ -220,7 +235,6 @@ namespace BulkyBook.Areas.Customer.Controllers
                 };
                 ShoppingCartVM.OrderHeader.OrderTotal += orderDetails.Count * orderDetails.Price;
                 _unitOfWork.OrderDetails.Add(orderDetails);
-
             }
 
             _unitOfWork.ShoppingCart.RemoveRange(ShoppingCartVM.ListCart);
@@ -239,6 +253,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 //process the payment
                 var options = new ChargeCreateOptions
                 {
+                    //in stripe it is 小數 so need to multiply by 100
                     Amount = Convert.ToInt32(ShoppingCartVM.OrderHeader.OrderTotal * 100),
                     Currency = "usd",
                     Description = "Order ID : " + ShoppingCartVM.OrderHeader.Id,
@@ -247,7 +262,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 var service = new ChargeService();
                 Charge charge = service.Create(options);
-
+                //transition
                 if (charge.Id == null)
                 {
                     ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusRejected;
@@ -263,16 +278,15 @@ namespace BulkyBook.Areas.Customer.Controllers
                     ShoppingCartVM.OrderHeader.PaymentDate = DateTime.Now;
                 }
             }
-
             _unitOfWork.Save();
 
             return RedirectToAction("OrderConfirmation", "Cart", new { id = ShoppingCartVM.OrderHeader.Id });
-
         }
 
         public IActionResult OrderConfirmation(int id)
         {
             OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id);
+            //SMS funciton
             TwilioClient.Init(_twilioOptions.AccountSid, _twilioOptions.AuthToken);
             try
             {
@@ -284,11 +298,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             }
             catch (Exception ex)
             {
-                throw ex;
+                
             }
-
-
-
             return View(id);
         }
     }

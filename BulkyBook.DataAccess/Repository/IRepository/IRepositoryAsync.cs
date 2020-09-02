@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace BulkyBook.DataAccess.Repository.IRepository
 {
+    //Copy from IRepository
     public interface IRepositoryAsync<T> where T :class
     {
         Task<T> GetAsync(int id);

@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 
 namespace BulkyBook.TagHelpers
 {
+    //consume it in CategoryController Index
     [HtmlTargetElement("div", Attributes ="page-model")]
     public class PageLinkTagHelper : TagHelper
     {
         [ViewContext]
         [HtmlAttributeNotBound]
         public ViewContext ViewContext { get; set; }
-
+        //root model for tag helper
         public PagingInfo PageModel { get; set; }
 
         public string PageAction { get; set; }
@@ -36,6 +37,7 @@ namespace BulkyBook.TagHelpers
                 if (PageClassesEnabled)
                 {
                     tag.AddCssClass(PageClass);
+                    //selected or non-selected page class
                     tag.AddCssClass(i == PageModel.CurrentPage ? PageClassSelected : PageClassNormal);
                 }
                 tag.InnerHtml.Append(i.ToString());

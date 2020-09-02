@@ -22,6 +22,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        //consume paging
         public async Task<IActionResult> Index(int productPage =1)
         {
             CategoryVM categoryVM = new CategoryVM()

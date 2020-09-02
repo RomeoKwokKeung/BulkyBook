@@ -10,6 +10,11 @@ using System.Threading.Tasks;
 
 namespace BulkyBook.DataAccess.Repository
 {
+    //Copy from Repository.cs
+    //void => async
+    //add Task
+    //add async, add await
+    //Add => AddAsync, ToList => ToListAsync, FirstOfDefault => FirstOfDefaultAsync, Find => FindAsync etc
     public class RepositoryAsync<T> : IRepositoryAsync<T> where T : class
     {
 
